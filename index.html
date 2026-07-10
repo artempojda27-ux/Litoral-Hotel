@@ -22,6 +22,12 @@
 <body>
   <div class="global-grade" aria-hidden="true"></div>
   <div class="breathe-vignette" aria-hidden="true"></div>
+  <div class="ch2-lightbox" id="ch2Lightbox">
+    <button type="button" class="ch2-lightbox-close" id="ch2LightboxClose" aria-label="Close">&times;</button>
+    <img class="ch2-lightbox-img" id="ch2LightboxImg" alt="">
+    <p class="ch2-lightbox-caption" id="ch2LightboxCaption"></p>
+  </div>
+
   <button type="button" class="silence-btn" id="silenceBtn" aria-label="Toggle silence mode">
     <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
       <circle cx="7.5" cy="7.5" r="6.5" stroke="var(--gold)" stroke-width="1"/>
@@ -123,10 +129,7 @@
 
     <div class="live-clock" id="liveClock">
       <span class="live-time" id="liveTime">--:--</span>
-      <span class="live-meta" id="liveWeather"></span>
       <span class="live-meta" id="liveSea"></span>
-      <span class="live-meta" id="liveMoon"></span>
-      <span class="live-label">Litoral, right now</span>
     </div>
 
     <div class="sunset-widget" id="sunsetWidget">

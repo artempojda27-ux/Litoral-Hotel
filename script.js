@@ -7,18 +7,18 @@
     night: 'assets/images/mobile-night.webp',
     logo: 'assets/images/logo.webp',
     ch1bg: 'assets/images/ch1-bg.webp',
-    bar: 'assets/images/ch2-bar.jpg',
-    dining: 'assets/images/ch2-dining.jpg',
+    bar: 'assets/images/ch2-bar.webp',
+    dining: 'assets/images/ch2-dining.webp',
     spa: 'assets/images/ch2-spa.webp',
     massage: 'assets/images/ch2-massage.webp',
-    poolNight: 'assets/images/ch2-poolnight.jpg',
-    infinity: 'assets/images/ch2-infinity.jpg',
-    beach: 'assets/images/ch2-beach.jpg',
-    lounge: 'assets/images/ch2-lounge.jpg',
-    gym: 'assets/images/ch2-gym.jpg',
+    poolNight: 'assets/images/ch2-poolnight.webp',
+    infinity: 'assets/images/ch2-infinity.webp',
+    beach: 'assets/images/ch2-beach.webp',
+    lounge: 'assets/images/ch2-lounge.webp',
+    gym: 'assets/images/ch2-gym.webp',
     ch4deluxe: 'assets/images/ch4-deluxe.webp',
     ch4junior: 'assets/images/ch4-junior.webp',
-    ch4villa: 'assets/images/ch4-villa.jpg',
+    ch4villa: 'assets/images/ch4-villa.webp',
     ch4twobed: 'assets/images/ch4-twobed.webp',
     amSpa1: 'assets/images/amenity-spa-1.webp', amSpa2: 'assets/images/amenity-spa-2.webp', amSpa3: 'assets/images/amenity-spa-3.webp',
     amGym1: 'assets/images/amenity-gym-1.webp', amGym2: 'assets/images/amenity-gym-2.webp', amGym3: 'assets/images/amenity-gym-3.webp',
@@ -105,25 +105,6 @@
   // 36°29'N 28°13'E — from the TDD subtitle
   const LAT = 36.4833, LON = 28.2167;
 
-  async function fetchWeather(){
-    const el = document.getElementById('liveWeather');
-    try {
-      const res = await fetch(
-        `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,wind_speed_10m&timezone=auto`
-      );
-      if (!res.ok) throw new Error('weather request failed: ' + res.status);
-      const data = await res.json();
-      const temp = Math.round(data.current.temperature_2m);
-      const wind = Math.round(data.current.wind_speed_10m);
-      el.textContent = `${temp}°C  ·  Wind ${wind} km/h`;
-      el.classList.add('is-ready');
-    } catch (e) {
-      console.warn('LITORAL weather fetch failed:', e);
-      el.textContent = 'Weather unavailable (blocked in this preview)';
-      el.classList.add('is-ready');
-    }
-  }
-
   async function fetchSeaTemp(){
     const el = document.getElementById('liveSea');
     try {
@@ -142,9 +123,7 @@
     }
   }
 
-  fetchWeather();
   fetchSeaTemp();
-  setInterval(fetchWeather, 15 * 60 * 1000);
   setInterval(fetchSeaTemp, 15 * 60 * 1000);
 
   // ---------- real-time sky (mobile: dawn / day / dusk-night anchors) ----------
@@ -966,6 +945,38 @@
   // ========== DESKTOP MOUSE-DRAG for horizontal galleries ==========
   // Touch swipe already works on mobile; mouse users on desktop have no
   // equivalent gesture unless we add click-and-drag scrolling ourselves.
+  // ========== CHAPTER II LIGHTBOX — click a grid card to see it larger (desktop only) ==========
+  function initCh2Lightbox(){
+    const lightbox = document.getElementById('ch2Lightbox');
+    const lightboxImg = document.getElementById('ch2LightboxImg');
+    const lightboxCaption = document.getElementById('ch2LightboxCaption');
+    const closeBtn = document.getElementById('ch2LightboxClose');
+    if (!lightbox) return;
+
+    document.querySelectorAll('.ch2-panel').forEach(panel => {
+      panel.addEventListener('click', () => {
+        if (window.innerWidth < 900) return; // desktop-only feature
+        const img = panel.querySelector('.ch2-image');
+        const caption = panel.querySelector('.ch2-caption');
+        if (!img) return;
+        lightboxImg.src = img.src;
+        lightboxImg.alt = img.alt || '';
+        lightboxCaption.textContent = caption ? caption.textContent : '';
+        lightbox.classList.add('is-open');
+      });
+    });
+
+    function close(){ lightbox.classList.remove('is-open'); }
+    closeBtn?.addEventListener('click', close);
+    lightbox.addEventListener('click', (e) => {
+      if (e.target === lightbox) close();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') close();
+    });
+  }
+  initCh2Lightbox();
+
   function initDragScroll(){
     const selectors = ['#ch1Track', '#ch2Track', '#ch3Track', '.rest-gallery-track', '.amen-lb-track'];
     const tracks = document.querySelectorAll(selectors.join(','));
@@ -1052,33 +1063,6 @@
     });
   }
   initSilenceMode();
-
-  // ========== REAL MOON PHASE — pure astronomy, no network needed ==========
-  function initMoonPhase(){
-    const el = document.getElementById('liveMoon');
-    if (!el) return;
-    function moonPhase(date){
-      // days since a known new moon (2000-01-06), synodic month = 29.53059 days
-      const synodic = 29.53058867;
-      const known = new Date(Date.UTC(2000, 0, 6, 18, 14, 0));
-      const days = (date - known) / 86400000;
-      const phase = ((days % synodic) + synodic) % synodic;
-      return phase / synodic; // 0 = new, 0.5 = full, 1 = new again
-    }
-    function label(p){
-      if (p < 0.03 || p > 0.97) return ['🌑', 'New Moon'];
-      if (p < 0.22) return ['🌒', 'Waxing Crescent'];
-      if (p < 0.28) return ['🌓', 'First Quarter'];
-      if (p < 0.47) return ['🌔', 'Waxing Gibbous'];
-      if (p < 0.53) return ['🌕', 'Full Moon'];
-      if (p < 0.72) return ['🌖', 'Waning Gibbous'];
-      if (p < 0.78) return ['🌗', 'Last Quarter'];
-      return ['🌘', 'Waning Crescent'];
-    }
-    const [icon, name] = label(moonPhase(new Date()));
-    el.textContent = `${icon} ${name}`;
-  }
-  initMoonPhase();
 
   // ========== HERO SHIMMER — canvas-drawn light glinting on the water ==========
   function initHeroShimmer(){
